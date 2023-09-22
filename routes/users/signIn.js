@@ -11,20 +11,25 @@ const userModel = require('../../models/users.model');
 
 
 router.post('/' , async (req , res) => {
-  const {email , password} = req.body;
+  const {email , password , tc} = req.body;
   if(email && email != '' && helper.validateEmail(email) && password && password != ''){
-    let primary = connectDB.useDb(constants.DEFAULT_DB);
-    let user = await primary.model(constants.MODELS.users , userModel).findOne({email : email}).lean();
-    if(user){
-      const match_password = await bcrypt.compare(password , user.password);
-      if(user.email === email && match_password){
-        const accessToken = helper.generateJWTtoken(user._id);
-        return responseManager.onSuccess('Login successfully...!' , {token : accessToken} , res);
+    if(tc == true){
+      let primary = connectDB.useDb(constants.DEFAULT_DB);
+      let user = await primary.model(constants.MODELS.users , userModel).findOne({email : email}).lean();
+      if(user){
+        const match_password = await bcrypt.compare(password , user.password);
+        if(user.email === email && match_password){
+          await primary.model(constants.MODELS.users , userModel).findByIdAndUpdate(user._id , {tc:true});
+          const accessToken = helper.generateJWTtoken(user._id);
+          return responseManager.onSuccess('Login successfully...!' , {token : accessToken} , res);
+        }else{
+          return responseManager.badrequest({ message: 'Invalid email or password.' }, res);
+        }
       }else{
-        return responseManager.badrequest({ message: 'Invalid email or password.' }, res);
+        return responseManager.badrequest({ message: 'Invalid email, please try again.' }, res);
       }
     }else{
-      return responseManager.badrequest({ message: 'Invalid email, please try again.' }, res);
+      return responseManager.badrequest({ message: 'Please accept our terms & condition.' }, res);
     }
   }else{
     return responseManager.badrequest({ message: 'Invalid data to login user, please try again.' }, res);

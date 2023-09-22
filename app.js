@@ -6,9 +6,6 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 let mongoose = require("mongoose");
 
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
-
 var app = express();
 
 // view engine setup
@@ -33,12 +30,10 @@ mongoose.connection.once('open', () => {
   console.log("Oops! database connection error:" + error);
 });
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
-
 const userpaths = [
   { pathUrl: '/signUp', routeFile: 'signUp' },
   { pathUrl: '/signIn', routeFile: 'signIn'},
+  { pathUrl: '/signOut', routeFile: 'signOut'},
 ];
 
 userpaths.forEach((path) => {
