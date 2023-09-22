@@ -32,9 +32,9 @@ router.post('/' , async (req , res) => {
           html:`Your otp is : ${obj.emailOTP}`
         });
         let createdUser = await primary.model(constants.MODELS.users , userModel).create(obj);
-        return responseManager.onSuccess('User register successfully...!' , {email : createdUser.email} , res);
+        return responseManager.onCreated('User register successfully...!' , {email : createdUser.email} , res);
       }else{
-        return responseManager.badrequest({ message: 'User already exist with same mobile, Please Login...' }, res);
+        return responseManager.badrequest({ message: 'User already exist with same email, Please Login...' }, res);
       }
     }else{
       return responseManager.badrequest({ message: 'Password and conform password does not match.' }, res);
@@ -46,7 +46,7 @@ router.post('/' , async (req , res) => {
 
 router.post('/verifyotp' , async (req , res) => {
   const {email , otp} = req.body;
-  if(email &&  email != '' && validateEmail(email) && otp && otp != '' && otp.length == 6){
+  if(email &&  email != '' && helper.validateEmail(email) && otp && otp != '' && otp.length == 6){
     let primary = connectDB.useDb(constants.DEFAULT_DB);
     let user = await primary.model(constants.MODELS.users , userModel).findOne({email : email}).lean();
     if(user && user.is_email_verified == false){
