@@ -1,7 +1,8 @@
 let constants = {
     DEFAULT_DB: process.env.DATABASE,
     MODELS: {
-        users: 'Users'
+        users: 'Users',
+        payments: 'payments'
     }
 };
 module.exports = constants;

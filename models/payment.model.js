@@ -9,12 +9,16 @@ let schema = new mongoose.Schema({
     type: mongoose.Types.ObjectId,
     default: null
   },
+  paymentID: {
+    type: String,
+    require: true,
+  },
   amount: {
     type: Number,
     require: true
   },
   planType: {
-    type: String,
+    type: Number,
     require: true
   },
   planName: {

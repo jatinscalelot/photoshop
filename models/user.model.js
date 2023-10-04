@@ -7,11 +7,16 @@ let schema = new mongoose.Schema({
   },
 	mobile: {
 		type: String,
+    unique: true,
 		require: true
 	},
   is_subscriber:{
     type: Boolean,
     default: false
+  },
+  planType: {
+    type: Number,
+    default: 0
   },
   planName: {
     type: String,
