@@ -20,20 +20,20 @@ router.post('/' , helper.firebasetoken ,async (req , res) => {
         // console.log("decodedToken :",decodedToken);
         let primary =  mongoConnection.useDb(constants.DEFAULT_DB);
         let findUser = await primary.model(constants.MODELS.users , userModel).findOne({"mobile": decodedToken.phone_number}).lean();
-        console.log("findeuser :",findUser);
+        // console.log("findeuser :",findUser);
         if(findUser == null){
-          console.log("decodedToken :",decodedToken);
+          // console.log("decodedToken :",decodedToken);
           let obj = {
             fid: decodedToken.uid,
             mobile: decodedToken.phone_number,
             is_login: true
           }
-          console.log("obj :",obj);
+          // console.log("obj :",obj);
           let newUser = await primary.model(constants.MODELS.users , userModel).create(obj);
-          console.log('new user :',newUser);
+          // console.log('new user :',newUser);
           let token = jwt.sign({_id : newUser._id} , process.env.PRIVETKEY , {expiresIn: '30d'});
           let updateUser = await primary.model(constants.MODELS.users , userModel).findByIdAndUpdate(newUser._id , {token: token} , {returnOriginal: false});
-          console.log("update user :",updateUser);
+          // console.log("update user :",updateUser);
           data = {
             fid: updateUser.fid,
             is_subscriber: updateUser.is_subscriber,
