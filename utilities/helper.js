@@ -25,14 +25,19 @@ exports.authenticateToken = async (req, res, next) => {
     const token = bearer[1];
     jwt.verify(token, process.env.PRIVETKEY, (err, auth) => {
       if (err) {
+        console.log("error :",err);
         return res.status(401).send({'status':401 ,'message': 'Unauthorized request...!'});
       } else {
         req.token = auth;
         req.Token = token;
+        next();
       }
     });
-    next();
   } else {
     return res.status(401).send({'status':401 ,'message': 'Unauthorized request...!'});
   }
+};
+
+exports.generateJWTToken = (userid) => {
+  return jwt.sign({_id : userid} , process.env.PRIVETKEY , {expiresIn: '30d'});
 };

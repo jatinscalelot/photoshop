@@ -7,14 +7,35 @@ let schema = new mongoose.Schema({
   },
   userid: {
     type: mongoose.Types.ObjectId,
-    default: null
+    require: true
   },
   paymentID: {
     type: String,
+    unique: true,
     require: true,
+  },
+  paymentStatus: {
+    type: String,
+    require: true
+  },
+  currency: {
+    type: String,
+    require: true
   },
   amount: {
     type: Number,
+    require: true
+  },
+  payment_method: {
+    type:String,
+    require: true
+  },
+  payment_method_types: {
+    type: [],
+    require: true
+  },
+  created: {
+    type:Number,
     require: true
   },
   planType: {
@@ -24,6 +45,10 @@ let schema = new mongoose.Schema({
   planName: {
     type: String,
     require: true
+  },
+  active: {
+    type:Boolean,
+    default: false
   },
   startDate: {
     type: Date,

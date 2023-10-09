@@ -3,12 +3,11 @@ const jwt = require('jsonwebtoken');
 
 const admin = require('../../config/firebaseAdmin');
 const helper = require('../../utilities/helper');
-const responseManager = require('../../utilities/response.manager');
 
 const mongoConnection = require('../../utilities/connections');
 const constants = require('../../utilities/constants');
 const userModel = require('../../models/user.model');
-const paymnetModel = require('../../models/payment.model');
+const paymentModel = require('../../models/payment.model');
 
 var router = express.Router();
 
@@ -17,26 +16,22 @@ router.post('/' , helper.firebasetoken ,async (req , res) => {
   if(token && token != ''){
     try {
       await admin.auth().verifyIdToken(token).then(async (decodedToken) => {
-        // console.log("decodedToken :",decodedToken);
         let primary =  mongoConnection.useDb(constants.DEFAULT_DB);
         let findUser = await primary.model(constants.MODELS.users , userModel).findOne({"mobile": decodedToken.phone_number}).lean();
-        // console.log("findeuser :",findUser);
         if(findUser == null){
-          // console.log("decodedToken :",decodedToken);
           let obj = {
             fid: decodedToken.uid,
             mobile: decodedToken.phone_number,
             is_login: true
           }
-          // console.log("obj :",obj);
           let newUser = await primary.model(constants.MODELS.users , userModel).create(obj);
-          // console.log('new user :',newUser);
           let token = jwt.sign({_id : newUser._id} , process.env.PRIVETKEY , {expiresIn: '30d'});
           let updateUser = await primary.model(constants.MODELS.users , userModel).findByIdAndUpdate(newUser._id , {token: token} , {returnOriginal: false});
-          // console.log("update user :",updateUser);
           data = {
+            userid: updateUser._id,
             fid: updateUser.fid,
             is_subscriber: updateUser.is_subscriber,
+            planType: updateUser.planType,
             planName: updateUser.planName,
             token: updateUser.token
           }
@@ -45,10 +40,11 @@ router.post('/' , helper.firebasetoken ,async (req , res) => {
           const token = jwt.sign({_id : findUser._id} , process.env.PRIVETKEY , {expiresIn: '30d'});
           const updateUser = await primary.model(constants.MODELS.users , userModel).findByIdAndUpdate(findUser._id , {$set: {token: token , is_login: true}} , {returnOriginal: false});
           if(updateUser.is_subscriber === true){
-            const payment = await primary.model(constants.MODELS.payments , paymnetModel).findOne({userid:updateUser._id}).lean();
+            const payment = await primary.model(constants.MODELS.payments , paymentModel).findOne({userid:updateUser._id , active: true}).lean();
             const currentDateTime = new Date();
-            if(currentDateTime < payment.endDate){
+            if(currentDateTime <= payment.endDate){
               let data = {
+                userid: updateUser._id,
                 fid: updateUser.fid,
                 is_subscriber: updateUser.is_subscriber,
                 planType: payment.planType,
@@ -59,8 +55,10 @@ router.post('/' , helper.firebasetoken ,async (req , res) => {
               }
               return res.status(200).send({'status': 200 , 'message': 'Login successfully...!' , 'userdata':data});
             }else{
-              const updateIsSubscriber = await primary.model(constants.MODELS.payments , userModel).findByIdAndUpdate(findUser._id , {$set: {is_subscriber:false , planType: 0 , planName: 'free'}} , {returnOriginal:false});
+              const updatePayment = await primary.model(constants.MODELS.payments , paymentModel).findByIdAndUpdate(updateUser.pID , {active: false});
+              const updateIsSubscriber = await primary.model(constants.MODELS.users , userModel).findByIdAndUpdate(updateUser._id , {$set: {is_subscriber:false , pID: null , paymentID: '' , planType: 0 , planName: 'free'}} , {returnOriginal:false});
               let data = {
+                userid: updateIsSubscriber._id,
                 fid: updateIsSubscriber.fid,
                 is_subscriber: updateIsSubscriber.is_subscriber,
                 planType: updateIsSubscriber.planType,
@@ -81,8 +79,6 @@ router.post('/' , helper.firebasetoken ,async (req , res) => {
           }
         }
       }).catch(async (error) => {
-        console.log("error :",error);
-        // return res.status(401).send({'status':401 ,'message': 'Unauthorized request...!'});
         if(error.errorInfo.code === 'auth/id-token-expired'){          
           return res.status(401).send({'status':401 ,'message': 'Token expired...!'});
         }else{

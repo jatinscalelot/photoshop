@@ -3,6 +3,7 @@ let mongoosePaginate = require("mongoose-paginate-v2");
 let schema = new mongoose.Schema({
   fid: {
     type: String,
+    unique: true,
     require: true
   },
 	mobile: {
@@ -13,6 +14,14 @@ let schema = new mongoose.Schema({
   is_subscriber:{
     type: Boolean,
     default: false
+  },
+  pID: {
+    type: mongoose.Types.ObjectId,
+    default: null
+  },
+  paymentID: {
+    type: String,
+    default: ''
   },
   planType: {
     type: Number,
