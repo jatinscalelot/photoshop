@@ -6,6 +6,14 @@ exports.onSuccess = (message, result, res) => {
 		IsSuccess: true
 	});
 };
+exports.onCreate = (message , result , res) => {
+	res.status(201).json({
+		Message: message,
+		Data: result,
+		Status: 201,
+		IsSuccess: true
+	});
+}
 exports.onError = (error, res) => {
 	console.log(error.message);
 	res.status(500).json({

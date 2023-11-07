@@ -1,4 +1,6 @@
 const express = require('express');
+var router = express.Router();
+
 const jwt = require('jsonwebtoken');
 
 const admin = require('../../config/firebaseAdmin');
@@ -9,7 +11,6 @@ const constants = require('../../utilities/constants');
 const userModel = require('../../models/user.model');
 const paymentModel = require('../../models/payment.model');
 
-var router = express.Router();
 
 router.post('/' , helper.firebasetoken ,async (req , res) => {
   const token = req.token;

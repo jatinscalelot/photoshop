@@ -1,14 +1,13 @@
 const express = require('express');
+var router = express.Router();
+
 const mongoose = require('mongoose');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const mongoConnection = require('../../utilities/connections');
 const constants = require('../../utilities/constants');
 const userModel = require('../../models/user.model');
 const paymentModel = require('../../models/payment.model');
-
 const helper = require('../../utilities/helper');
-
-var router = express.Router();
 
 function getCurrentAndNextMonthDatesWithTimestamps() {
   const currentDate = new Date();

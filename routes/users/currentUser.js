@@ -1,13 +1,12 @@
 const express = require('express');
+var router = express.Router();
+
 const mongoose = require('mongoose');
 const mongoConnection = require('../../utilities/connections');
 const constants = require('../../utilities/constants');
 const userModel = require('../../models/user.model');
 const paymentModel = require('../../models/payment.model');
-
 const helper = require('../../utilities/helper');
-
-var router = express.Router();
 
 router.get('/' , helper.authenticateToken , async (req , res) => {
   if(req.token._id && mongoose.Types.ObjectId.isValid(req.token._id)){
